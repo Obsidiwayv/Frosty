@@ -1,4 +1,5 @@
 from os import getcwd
+from time import sleep
 
 from discord.ext import commands
 
@@ -33,6 +34,27 @@ class Core(commands.Cog):
         embed.add_field(name="Minecraft Server", value="status")
         embed.set_footer(text="Default prefix is ~")
         await ctx.send(embed=embed, file=frosty)
+
+    @commands.command()
+    async def destruct(self, ctx: commands.Context):
+        await ctx.message.delete()
+        await ctx.send("Im going to commit tnt")
+        await ctx.send("in 3")
+        sleep(3)
+        await ctx.send("2")
+        sleep(3)
+        await ctx.send("1")
+        sleep(5)
+        await ctx.send("Just kidding ( ͡° ͜ʖ ͡°)")
+
+    @commands.command()
+    async def emojis(self, ctx: commands.Context):
+        available = []
+        for emoji in self.bot.emojis:
+            available.append(emoji.name)
+
+        print(available)
+        await ctx.send(content=f"```bots available emojis```\n{available}")
 
 
 async def setup(bot: commands.Bot):
