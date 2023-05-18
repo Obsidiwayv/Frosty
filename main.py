@@ -20,7 +20,7 @@ client.remove_command("help")
 async def on_ready():
     print("ready to serve!")
 
-    node1 = wavelink.Node(uri='http://n1.proxied.host:25506', password='youshallnotpass')
+    node1 = wavelink.Node(uri='http://n1.proxied.host:25506', password='proxied.host')
     await wavelink.NodePool.connect(client=client, nodes=[node1])
 
     for filename in listdir('./cogs'):
