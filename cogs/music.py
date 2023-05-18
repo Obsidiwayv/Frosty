@@ -3,7 +3,7 @@ from discord.ext import commands
 import discord
 
 
-class Fun(commands.Cog):
+class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -13,4 +13,4 @@ class Fun(commands.Cog):
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(Fun(bot))
+    await bot.add_cog(Music(bot))

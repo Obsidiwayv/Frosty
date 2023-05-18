@@ -1,7 +1,9 @@
 from discord.ext import commands
 from memelib.api import DankMemeClient
+from os import getcwd
 
 import discord
+import pedalboard
 
 memes = DankMemeClient()
 
@@ -17,6 +19,11 @@ class Fun(commands.Cog):
         embed.description = f"{danks['title']} | {danks['author']}"
         embed.set_image(url=danks['img_url'])
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def colour(self, ctx: commands.Context):
+        pitchmap = pedalboard.load_plugin(f"{getcwd()}/vst/pitchmap/PITCHMAP VST3.vst3")
+        await ctx.send(content=f"{pitchmap.parameters.keys()}")
 
 
 async def setup(bot: commands.Bot):
