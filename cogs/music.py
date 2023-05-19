@@ -21,7 +21,7 @@ class Music(commands.Cog):
         track = await wavelink.YouTubeTrack.search(query, return_first=True)
         await ctx.send(f"```Now Playing {track.title}```\n{track.uri}")
 
-        if not voice_ids.:
+        if not voice_ids.get(ctx.guild.id):
             voice_ids.update(f"{ctx.guild.id}", [track.title])
         else:
             voice_ids[f"{ctx.guild.id}"].append(track.title)

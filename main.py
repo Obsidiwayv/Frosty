@@ -8,10 +8,12 @@ import wavelink
 with open("config.json", "r") as file:
     config = json.load(file)
 
+
 intents = discord.Intents.default()
 intents.message_content = True
 
 client = commands.Bot(command_prefix='~', intents=intents)
+
 
 client.remove_command("help")
 
