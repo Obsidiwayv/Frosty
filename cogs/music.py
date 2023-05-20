@@ -10,6 +10,13 @@ class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+#    @commands.Cog.listener()
+#    async def on_wavelink_track_end(self, player: wavelink.Player):
+#        if len(voice_ids[f"{player.guild.id}"]):
+#            first = voice_ids[f"{player.guild.id}"].pop()
+#            track = await wavelink.YouTubeTrack.search(first, return_first=True)
+#            await player.play(track)
+
     @commands.command()
     async def play(self, ctx: commands.Context, *, query: str):
         if not ctx.voice_client:
@@ -19,21 +26,18 @@ class Music(commands.Cog):
             vc: wavelink.Player = ctx.voice_client
 
         track = await wavelink.YouTubeTrack.search(query, return_first=True)
-        await ctx.send(f"```Now Playing {track.title}```\n{track.uri}")
 
-        if not voice_ids.get(ctx.guild.id):
-            voice_ids.update(f"{ctx.guild.id}", [track.title])
+        voice_ids[f"{ctx.guild.id}"] = []
+        voice_ids[f"{ctx.guild.id}"].append(track.title)
+
+        if len(voice_ids[f"{ctx.guild.id}"]) == 1:
+            print(voice_ids, len(voice_ids[f"{ctx.guild.id}"]))
+            await ctx.send(f"```Now Playing {track.title}```\n{track.uri}")
+            await vc.play(track)
+            await ctx.guild.change_voice_state(channel=vc.channel, self_mute=False, self_deaf=True)
         else:
             voice_ids[f"{ctx.guild.id}"].append(track.title)
-
-        print(voice_ids)
-
-        while voice_ids[ctx.guild.id].count():
-            if not vc.is_playing():
-                first = voice_ids[f"{ctx.guild.id}"].pop()
-                return await ctx.invoke(self.bot.get_command("play"), ctx=ctx, query=first)
-        await vc.play(track)
-        await ctx.guild.change_voice_state(channel=vc.channel, self_mute=False, self_deaf=True)
+            await ctx.send(f"Added {track.title} to the queue!")
 
     @commands.command()
     async def disconnect(self, ctx: commands.Context):
