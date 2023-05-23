@@ -19,6 +19,7 @@ class Music(commands.Cog):
                 await payload.player.context.send(f"```Started playing {track.title}```\n{track.uri}")
             except wavelink.QueueEmpty:
                 await payload.player.stop()
+                await payload.player.context.send("End of queue, stopped playing...")
         if payload.reason == "STOPPED":
             await payload.player.stop()
 
