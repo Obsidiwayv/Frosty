@@ -1,5 +1,6 @@
 import discord
 import gd
+import json
 
 
 def create_level_embed(level: gd.Level):
@@ -8,3 +9,8 @@ def create_level_embed(level: gd.Level):
     embed.add_field(name="Length", value=level.length, inline=True)
     embed.add_field(name="Difficulty", value=level.difficulty)
     return embed
+
+
+def get_config():
+    with open("config.json", "r") as file:
+        return json.load(file)
