@@ -1,5 +1,6 @@
 {
   "secrets": {
     "token": "MTEwNDYwNDc4MjAyMDI2ODA5Mg.GptImx.M9HeTvuwXF_mEZz04rwb5ooX_8vQjuPpFt3pOo"
-  }
+  },
+  "prefix": "~"
 }

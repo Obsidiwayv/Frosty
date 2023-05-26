@@ -31,6 +31,10 @@ class GD(commands.Cog):
         level = await client.get_daily()
         await ctx.send(embed=utils.create_level_embed(level=level))
 
+    @commands.command()
+    async def weekly(self, ctx: commands.Context):
+        level = await client.get_weekly()
+        await ctx.send(embed=utils.create_level_embed(level))
 
 
 async def setup(bot: commands.Bot):

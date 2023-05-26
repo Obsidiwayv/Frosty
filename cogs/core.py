@@ -15,7 +15,7 @@ class Core(commands.Cog):
         await ctx.send(content=f"Pong! {self.bot.latency}")
 
     @commands.command()
-    async def info(self, ctx: commands.Context):
+    async def botinfo(self, ctx: commands.Context):
         embed = discord.Embed(color=0x703BE7)
         frosty = discord.File(f"{getcwd()}/img/Frosty_Banner.png", filename="image.png")
         embed.description = "A fluffy protogen to serve!"
