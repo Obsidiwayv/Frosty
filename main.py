@@ -4,18 +4,34 @@ from os import listdir
 import discord
 import json
 import wavelink
+import gd
+
+import utils
+
+music_disabled = False
+
+channels = {
+    "daily": 1111472635520487474,
+    "weekly": 1111472730781532211
+}
 
 with open("config.json", "r") as file:
     config = json.load(file)
-
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 client = commands.Bot(command_prefix='~', intents=intents)
-
+gd_client = gd.Client()
 
 client.remove_command("help")
+
+
+@gd_client.event
+async def on_daily(daily: gd.Level):
+    channel = client.get_channel(channels["daily"])
+    if channel.type == discord.ChannelType.text:
+        await channel.send(embed=utils.create_level_embed(level=daily))
 
 
 @client.event
