@@ -20,8 +20,8 @@ class Core(commands.Cog):
         frosty = discord.File(f"{getcwd()}/img/Frosty_Banner.png", filename="image.png")
         embed.description = "A fluffy protogen to serve!"
         embed.set_image(url="attachment://image.png")
-        embed.add_field(name="developer", value="Obisidiwayv#3420 (tag may subject to change)", inline=True)
-        embed.add_field(name="Protogen software version", value="1.0-Nexus", inline=True)
+        embed.add_field(name="developer", value="obsidiwayv/obsidiwayv#3420", inline=True)
+        embed.add_field(name="Protogen software version", value="1.2-Nexus", inline=True)
         await ctx.send(embed=embed, file=frosty)
 
 #    @commands.command()

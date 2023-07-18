@@ -11,8 +11,8 @@ import utils
 music_disabled = False
 
 channels = {
-    "daily": 1111472635520487474,
-    "weekly": 1111472730781532211
+    "daily": 1130776352069521408,
+    "weekly": 1130776542662885387
 }
 
 with open("config.json", "r") as file:
@@ -21,7 +21,7 @@ with open("config.json", "r") as file:
 intents = discord.Intents.default()
 intents.message_content = True
 
-client = commands.Bot(command_prefix='~', intents=intents)
+client = commands.Bot(command_prefix='~', intents=intents, owner_id=config["owner_id"])
 gd_client = gd.Client()
 
 client.remove_command("help")
@@ -41,6 +41,8 @@ async def on_command_error(ctx, err):
         await ctx.send(f"```{err}```")
     elif isinstance(err, commands.MissingRequiredArgument):
         await ctx.send(f"```{err}```")
+    elif isinstance(err, commands.NotOwner):
+        return
 
 
 @client.event
