@@ -4,16 +4,10 @@ from os import listdir
 import discord
 import json
 import wavelink
-import gd
 
 import utils
 
 music_disabled = False
-
-channels = {
-    "daily": 1130776352069521408,
-    "weekly": 1130776542662885387
-}
 
 with open("config.json", "r") as file:
     config = json.load(file)
@@ -22,17 +16,8 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = commands.Bot(command_prefix='~', intents=intents, owner_id=config["owner_id"])
-gd_client = gd.Client()
 
 client.remove_command("help")
-
-
-@gd_client.event
-async def on_daily(daily: gd.Level):
-    channel = client.get_channel(channels["daily"])
-    if channel.type == discord.ChannelType.text:
-        await channel.send(embed=utils.create_level_embed(level=daily))
-
 
 @client.event
 async def on_command_error(ctx, err):
@@ -48,9 +33,12 @@ async def on_command_error(ctx, err):
 @client.event
 async def on_ready():
     print("ready to serve!")
+    await init_lavalink()
 
-    node1 = wavelink.Node(uri='http://n1.proxied.host:25506', password='proxied.host')
-    await wavelink.NodePool.connect(client=client, nodes=[node1])
+
+async def init_lavalink():
+    node1 = wavelink.Node(uri='http://n1.proxied.host:25589', password='wayvlink')
+    await wavelink.Pool.connect(client=client, nodes=[node1])
 
     for filename in listdir('./cogs'):
         if filename.endswith('.py') and filename != '__init__.py':
