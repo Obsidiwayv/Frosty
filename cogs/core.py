@@ -16,24 +16,12 @@ class Core(commands.Cog):
 
     @commands.command()
     async def botinfo(self, ctx: commands.Context):
-        embed = discord.Embed(color=0x703BE7)
-        frosty = discord.File(f"{getcwd()}/img/Frosty_Banner.png", filename="image.png")
+        embed = discord.Embed(color=0x00FF7F)
         embed.description = "A fluffy protogen to serve!"
-        embed.set_image(url="attachment://image.png")
+        embed.set_image(url="https://wayvlyte.space/octane_banner.png")
         embed.add_field(name="developer", value="obsidiwayv/obsidiwayv#3420", inline=True)
         embed.add_field(name="Protogen software version", value="1.2-Nexus", inline=True)
-        await ctx.send(embed=embed, file=frosty)
-
-#    @commands.command()
-#    async def help(self, ctx: commands.Context):
-#        embed = discord.Embed(color=0x703BE7)
-#        frosty = discord.File(f"{getcwd()}/img/Frosty_Banner.png", filename="image.png")
-#        embed.set_image(url="attachment://image.png")
-#        embed.add_field(name="Core Commands", value="info, ping")
-#        embed.add_field(name="Fun Commands", value="meme")
-#        embed.add_field(name="Minecraft Server", value="status")
-#        embed.set_footer(text="Default prefix is ~")
-#        await ctx.send(embed=embed, file=frosty)
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def destruct(self, ctx: commands.Context):

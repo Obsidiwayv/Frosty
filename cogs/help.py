@@ -104,8 +104,9 @@ class Help(commands.Cog):
         else:
             msg = ' '.join(commands)
             embed.add_field(name="Not found", value=f'Command/category `{msg}` not found.')
-
-        embed.set_image(url="https://wayvsite.space/frosty_banner.png")
+            
+        embed.colour = 0x00FF7F
+        embed.set_image(url="https://wayvsite.space/octane_banner.png")
 
         await ctx.send(embed=embed)
         return

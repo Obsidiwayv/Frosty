@@ -6,6 +6,7 @@ import json
 import wavelink
 
 import utils
+from modules.message import MessageModule
 
 music_disabled = False
 
@@ -34,6 +35,13 @@ async def on_command_error(ctx, err):
 async def on_ready():
     print("ready to serve!")
     await init_lavalink()
+
+
+@client.event
+async def on_message(message: discord.Message):
+    message_handler = MessageModule(message)
+    await message_handler.init_gif()
+    await client.process_commands(message)
 
 
 async def init_lavalink():

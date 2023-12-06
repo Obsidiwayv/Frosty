@@ -1,0 +1,5 @@
+discord~=2.3.2
+pedalboard~=0.8.6
+MemeLib~=0.1.5
+wavelink~=3.0.0
+PyMySQL~=1.1.0

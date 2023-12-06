@@ -1,0 +1,21 @@
+import discord
+import re
+
+from utils import get_config
+
+
+class MessageModule:
+    def __init__(self, event: discord.Message):
+        self.event = event
+        self.config = get_config()
+
+    async def init_gif(self):
+        for snowflake in self.config["guilds"]:
+            if self.event.guild.id == snowflake and self.config["owner_id"] == self.event.author.id:
+                if bool(re.match(r"^https:\/\/tenor\.com\/(?:view\/)?[a-zA-Z0-9_-]+(?:\.gif)?$", self.event.content)):
+                    if self.event.reference:
+                        await self.event.channel.send(content=self.event.content, reference=self.event.reference)
+                    else:
+                        await self.event.channel.send(self.event.content)
+                    await self.event.delete()
+
