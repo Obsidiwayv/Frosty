@@ -75,7 +75,7 @@ class Music(commands.Cog):
                 while s <= 7:
                     song_data = tracks[s]
                     songs_list += f"{s + 1}. {song_data.author} - {song_data.title}\n"
-                s += 1
+                    s += 1
 
                 choice_message = await ctx.send(f"```\n{songs_list}\n```")
                 await choice_message.add_reaction(emoji_1)
@@ -158,12 +158,12 @@ class Music(commands.Cog):
             if isinstance(tracks, wavelink.Playlist):
                 added_embed.description = f"Added {songs} to the queue"
             else:
-                song = tracks[0]
-            if has_choice:
-                added_embed.description = f"Added {choice_track.title} to the queue"
-            else:
-                added_embed.description = f"Added {song.title} to the queue"
-                await ctx.send(embed=added_embed)
+                if has_choice:
+                    added_embed.description = f"Added {choice_track.title} to the queue"
+                else:
+                    song = tracks[0]
+                    added_embed.description = f"Added {song.title} to the queue"
+                    await ctx.send(embed=added_embed)
 
     @commands.command()
     async def disconnect(self, ctx: commands.Context):
