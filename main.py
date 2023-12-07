@@ -20,6 +20,7 @@ client = commands.Bot(command_prefix='~', intents=intents, owner_id=config["owne
 
 client.remove_command("help")
 
+
 @client.event
 async def on_command_error(ctx, err):
     print(err)
@@ -35,6 +36,7 @@ async def on_command_error(ctx, err):
 async def on_ready():
     print("ready to serve!")
     await init_lavalink()
+    await load()
 
 
 @client.event
@@ -48,9 +50,10 @@ async def init_lavalink():
     node1 = wavelink.Node(uri='http://n1.proxied.host:25589', password='wayvlink')
     await wavelink.Pool.connect(client=client, nodes=[node1])
 
+
+async def load():
     for filename in listdir('./cogs'):
         if filename.endswith('.py') and filename != '__init__.py':
             await client.load_extension(f'cogs.{filename[:-3]}')
-
 
 client.run(config["secrets"]["token"])

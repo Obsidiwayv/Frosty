@@ -1,7 +1,11 @@
+import os
+from io import BytesIO
+from math import isnan
 from typing import cast
-
+from PIL import ImageFont, Image, ImageDraw
 from discord.ext import commands
 
+import requests
 import discord
 import wavelink
 import asyncio
@@ -10,15 +14,6 @@ from utils import get_config
 
 voice_ids = {}
 default_response = "I'm not in any voice channel!"
-
-emoji_1 = "1️⃣"
-emoji_2 = "2️⃣"
-emoji_3 = "3️⃣"
-emoji_4 = "4️⃣"
-emoji_5 = "5️⃣"
-emoji_6 = "6️⃣"
-emoji_7 = "7️⃣"
-emoji_8 = "8️⃣"
 
 
 async def check_and_send(ctx: commands.Context, message: str):
@@ -29,6 +24,63 @@ async def check_and_send(ctx: commands.Context, message: str):
     return player
 
 
+async def draw_song_interface(name, time, artist, thumbnail_size, cover: str):
+    song_cover_image = Image.open(requests.get(cover, stream=True).raw)
+
+    # Create a modern interface image
+    width, height = 800, 200
+
+    # Convert the song cover image to RGBA mode
+    song_cover_image = song_cover_image.convert("RGBA")
+
+    # Create a thumbnail of the song cover
+    thumbnail_cover = song_cover_image.copy()
+    thumbnail_cover.thumbnail(thumbnail_size)
+
+    # Calculate the position to place the thumbnail on the side
+    thumbnail_position = (20, (height - thumbnail_size[1]) // 2)
+
+    # Create an empty RGBA image
+    modern_interface_image = Image.new("RGBA", (width, height), (2, 4, 3))
+
+    # Paste the song cover thumbnail on the side
+    modern_interface_image.paste(thumbnail_cover, thumbnail_position, thumbnail_cover)
+
+    # Draw additional elements (title, time, etc.) on the other side
+    font_size = 30
+    font = ImageFont.truetype(
+        os.path.join(
+            os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__), ".."
+                )
+            ),
+            "FiraSans-Bold.ttf"
+        ),
+        font_size
+    )
+
+    font_anurati_path = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "Anurati.otf")
+    font_anurati = ImageFont.truetype(font_anurati_path, 30)
+
+    total_seconds = time // 1000
+
+    # Calculate hours, minutes, and seconds
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    draw = ImageDraw.Draw(modern_interface_image)
+    draw.text((220, height - 120), f"{artist} - {name}", fill="white", font=font)
+    draw.text((220, height - 70), f"time: {minutes}:{seconds}", fill="white", font=font)
+    draw.text((340, height - 170), "Now playing:", fill="white", font=font_anurati)
+
+    # Save the image to a temporary file
+    image_path = "modern_interface.png"
+    modern_interface_image.save(image_path)
+
+    return image_path
+
+
 class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -36,10 +88,20 @@ class Music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload: wavelink.TrackStartEventPayload):
-        started_embed = discord.Embed()
-        started_embed.description = f"Now playing [{payload.track.title}]({payload.track.uri})"
-        started_embed.set_image(url=payload.track.artwork)
-        await payload.player.context.send(embed=started_embed)
+        ts = 180
+        image_path = await draw_song_interface(
+            payload.track.title,
+            payload.track.length,
+            payload.track.author,
+            (ts, ts),
+            payload.track.artwork
+        )
+        with open(image_path, 'rb') as file:
+            # Create a discord.File object
+            modern_interface_image = discord.File(BytesIO(file.read()), filename=f"cover_{payload.track.title}.png")
+
+            # Send the image to the Discord channel
+            await payload.player.context.send(file=modern_interface_image)
 
     @commands.command()
     async def play(self, ctx: commands.Context, *, query: str):
@@ -72,65 +134,36 @@ class Music(commands.Cog):
                 songs_list = ""
                 s = 0
 
-                while s <= 7:
+                while s <= 14:
                     song_data = tracks[s]
                     songs_list += f"{s + 1}. {song_data.author} - {song_data.title}\n"
                     s += 1
 
-                choice_message = await ctx.send(f"```\n{songs_list}\n```")
-                await choice_message.add_reaction(emoji_1)
-                await choice_message.add_reaction(emoji_2)
-                await choice_message.add_reaction(emoji_3)
-                await choice_message.add_reaction(emoji_4)
-                await choice_message.add_reaction(emoji_5)
-                await choice_message.add_reaction(emoji_6)
-                await choice_message.add_reaction(emoji_7)
-                await choice_message.add_reaction(emoji_8)
+                await ctx.send(f"```\n{songs_list}\n```\nsay a number 1 - 15 to pick a song")
 
-                await asyncio.sleep(10)
+                def check(m):
+                    return m.author == ctx.author
 
-                got_choice_message = await ctx.channel.fetch_message(choice_message.id)
+                try:
+                    waited = await self.bot.wait_for("message", timeout=10, check=check)
+                    parsed_int = int(waited.content)
 
-                # removing everyone else's reactions first
-                for r in got_choice_message.reactions:
-                    async for u in r.users():
-                        if not u.id == ctx.author.id:
-                            if not u.id == ctx.me.id:
-                                await r.remove(u)
+                    if isnan(parsed_int):
+                        await ctx.send("The number you provided isn't a number!")
+                        return
 
-                for reaction in got_choice_message.reactions:
-                    if reaction.emoji == emoji_1 and reaction.count == 2:
-                        await player.queue.put_wait(tracks[0])
-                        choice_track = tracks[0]
-                        has_choice = True
-                    elif reaction.emoji == emoji_2 and reaction.count == 2:
-                        await player.queue.put_wait(tracks[1])
-                        choice_track = tracks[1]
-                        has_choice = True
-                    elif reaction.emoji == emoji_3 and reaction.count == 2:
-                        await player.queue.put_wait(tracks[2])
-                        choice_track = tracks[2]
-                        has_choice = True
-                    elif reaction.emoji == emoji_4 and reaction.count == 2:
-                        await player.queue.put_wait(tracks[3])
-                        choice_track = tracks[3]
-                        has_choice = True
-                    elif reaction.emoji == emoji_5 and reaction.count == 2:
-                        await player.queue.put_wait(tracks[4])
-                        choice_track = tracks[4]
-                        has_choice = True
-                    elif reaction.emoji == emoji_6 and reaction.count == 2:
-                        await player.queue.put_wait(tracks[5])
-                        choice_track = tracks[5]
-                        has_choice = True
-                    elif reaction.emoji == emoji_7 and reaction.count == 2:
-                        await player.queue.put_wait(tracks[6])
-                        choice_track = tracks[6]
-                        has_choice = True
-                    elif reaction.emoji == emoji_8 and reaction.count == 2:
-                        await player.queue.put_wait(tracks[7])
-                        choice_track = tracks[7]
-                        has_choice = True
+                    after_error_subtract = parsed_int - 1
+
+                    if not tracks[after_error_subtract]:
+                        await ctx.send("There is no track of that number")
+                        return
+
+                    await player.queue.put_wait(tracks[after_error_subtract])
+                    choice_track = tracks[after_error_subtract]
+                    has_choice = True
+                except asyncio.TimeoutError:
+                    await ctx.send('Canceled choice')
+                    return
 
         songs: int
         if not has_choice:
@@ -179,8 +212,12 @@ class Music(commands.Cog):
         player = await check_and_send(ctx, default_response)
         if not player:
             return
+        await ctx.send(f"Track {'paused' if not player.paused else 'un-paused'}")
+        await ctx.send(
+            f"to {'un-pause' if not player.paused else 'pause'}"
+            f"run {get_config()['prefix']}pause again"
+        )
         await player.pause(not player.paused)
-        await ctx.message.add_reaction(self.config["emotes"]["success"])
 
     @commands.command()
     async def skip(self, ctx: commands.Context):

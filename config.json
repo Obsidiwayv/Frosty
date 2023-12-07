@@ -1,13 +1,16 @@
 {
   "secrets": {
-    "token": "MTEwNDYwNDc4MjAyMDI2ODA5Mg.GptImx.M9HeTvuwXF_mEZz04rwb5ooX_8vQjuPpFt3pOo"
+    "token": "MTEwNDYwNDc4MjAyMDI2ODA5Mg.GptImx.M9HeTvuwXF_mEZz04rwb5ooX_8vQjuPpFt3pOo",
+    "octane_token": "MTEwNDYwNDc4MjAyMDI2ODA5Mg.GptImx.M9HeTvuwXF_mEZz04rwb5ooX_8vQjuPpFt3pOo",
+    "drift_token": "MTE4MjA3ODk0NTgxMDcyNjk3Mg.GI05j7.KB950EcI5TUfCN-pV8NGCkUbxDOR3m2_j-9OSg"
   },
   "emotes": {
     "success": "<:success:1170155717236379751>",
     "play": "<:failed:1170155764749447178>"
   },
   "guilds": [
-    1163103469725556786
+    1163103469725556786,
+    749619347751829534
   ],
   "owner_id": 609899399358971924,
   "prefix": "~"

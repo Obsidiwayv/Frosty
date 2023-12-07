@@ -20,7 +20,7 @@ class Core(commands.Cog):
         embed.description = "A fluffy protogen to serve!"
         embed.set_image(url="https://wayvlyte.space/octane_banner.png")
         embed.add_field(name="developer", value="obsidiwayv/obsidiwayv#3420", inline=True)
-        embed.add_field(name="Protogen software version", value="1.2-Nexus", inline=True)
+        embed.add_field(name="Protogen software version", value="1.2.0-Titanium", inline=True)
         await ctx.send(embed=embed)
 
     @commands.command()

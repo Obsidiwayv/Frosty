@@ -3,3 +3,6 @@ pedalboard~=0.8.6
 MemeLib~=0.1.5
 wavelink~=3.0.0
 PyMySQL~=1.1.0
+ossapi~=3.4.2
+requests~=2.31.0
+Pillow~=10.1.0
