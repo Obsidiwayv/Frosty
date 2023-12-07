@@ -1,9 +1,10 @@
-from os import getcwd
+from io import BytesIO
 from time import sleep
-
 from discord.ext import commands
 
 import discord
+
+import assets.images as assets
 
 
 class Core(commands.Cog):
@@ -43,6 +44,23 @@ class Core(commands.Cog):
 
         print(available)
         await ctx.send(content=f"```bots available emojis```\n{available}")
+
+    @commands.command()
+    async def card(self, ctx: commands.Context):
+        ts = 180
+        image_path = await assets.draw_song_interface(
+            "payload.track.title",
+            400000,
+            "payload.track.author",
+            (ts, ts),
+            "https://wayvlyte.space/backgrounds/Crimson.jpg"
+        )
+        with open(image_path, 'rb') as file:
+            # Create a discord.File object
+            modern_interface_image = discord.File(BytesIO(file.read()), filename=f"cover_test.png")
+
+            # Send the image to the Discord channel
+            await ctx.send(file=modern_interface_image)
 
 
 async def setup(bot: commands.Bot):

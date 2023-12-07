@@ -1,16 +1,16 @@
-import os
+import re
 from io import BytesIO
 from math import isnan
 from typing import cast
-from PIL import ImageFont, Image, ImageDraw
 from discord.ext import commands
 
-import requests
 import discord
 import wavelink
 import asyncio
 
 from utils import get_config
+
+import assets.images as assets
 
 voice_ids = {}
 default_response = "I'm not in any voice channel!"
@@ -24,63 +24,6 @@ async def check_and_send(ctx: commands.Context, message: str):
     return player
 
 
-async def draw_song_interface(name, time, artist, thumbnail_size, cover: str):
-    song_cover_image = Image.open(requests.get(cover, stream=True).raw)
-
-    # Create a modern interface image
-    width, height = 800, 200
-
-    # Convert the song cover image to RGBA mode
-    song_cover_image = song_cover_image.convert("RGBA")
-
-    # Create a thumbnail of the song cover
-    thumbnail_cover = song_cover_image.copy()
-    thumbnail_cover.thumbnail(thumbnail_size)
-
-    # Calculate the position to place the thumbnail on the side
-    thumbnail_position = (20, (height - thumbnail_size[1]) // 2)
-
-    # Create an empty RGBA image
-    modern_interface_image = Image.new("RGBA", (width, height), (2, 4, 3))
-
-    # Paste the song cover thumbnail on the side
-    modern_interface_image.paste(thumbnail_cover, thumbnail_position, thumbnail_cover)
-
-    # Draw additional elements (title, time, etc.) on the other side
-    font_size = 30
-    font = ImageFont.truetype(
-        os.path.join(
-            os.path.abspath(
-                os.path.join(
-                    os.path.dirname(__file__), ".."
-                )
-            ),
-            "FiraSans-Bold.ttf"
-        ),
-        font_size
-    )
-
-    font_anurati_path = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "Anurati.otf")
-    font_anurati = ImageFont.truetype(font_anurati_path, 30)
-
-    total_seconds = time // 1000
-
-    # Calculate hours, minutes, and seconds
-    hours, remainder = divmod(total_seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-
-    draw = ImageDraw.Draw(modern_interface_image)
-    draw.text((220, height - 120), f"{artist} - {name}", fill="white", font=font)
-    draw.text((220, height - 70), f"time: {minutes}:{seconds}", fill="white", font=font)
-    draw.text((340, height - 170), "Now playing:", fill="white", font=font_anurati)
-
-    # Save the image to a temporary file
-    image_path = "modern_interface.png"
-    modern_interface_image.save(image_path)
-
-    return image_path
-
-
 class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -89,7 +32,7 @@ class Music(commands.Cog):
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload: wavelink.TrackStartEventPayload):
         ts = 180
-        image_path = await draw_song_interface(
+        image_path = await assets.draw_song_interface(
             payload.track.title,
             payload.track.length,
             payload.track.author,
@@ -146,6 +89,9 @@ class Music(commands.Cog):
 
                 try:
                     waited = await self.bot.wait_for("message", timeout=10, check=check)
+                    if not re.match(r'^\d+$', waited.content):
+                        await ctx.send("The string you provided isn't a number!")
+                        return
                     parsed_int = int(waited.content)
 
                     if isnan(parsed_int):
@@ -196,7 +142,7 @@ class Music(commands.Cog):
                 else:
                     song = tracks[0]
                     added_embed.description = f"Added {song.title} to the queue"
-                    await ctx.send(embed=added_embed)
+                await ctx.send(embed=added_embed)
 
     @commands.command()
     async def disconnect(self, ctx: commands.Context):
