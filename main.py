@@ -16,7 +16,11 @@ with open("config.json", "r") as file:
 intents = discord.Intents.default()
 intents.message_content = True
 
-client = commands.Bot(command_prefix='~', intents=intents, owner_id=config["owner_id"])
+client = commands.Bot(
+    command_prefix='~',
+    intents=intents,
+    owner_id=config["owner_id"]
+)
 
 client.remove_command("help")
 

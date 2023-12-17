@@ -1,3 +1,4 @@
+import typing
 from io import BytesIO
 from time import sleep
 from discord.ext import commands
@@ -5,11 +6,13 @@ from discord.ext import commands
 import discord
 
 import assets.images as assets
+from utils import get_config
 
 
 class Core(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.config = get_config()
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
@@ -44,6 +47,63 @@ class Core(commands.Cog):
 
         print(available)
         await ctx.send(content=f"```bots available emojis```\n{available}")
+
+    @commands.command(aliases=["q"])
+    async def quote(
+            self,
+            ctx: commands.Context,
+            channel_id: int | discord.TextChannel,
+            message_id: typing.Optional[int] = 0
+    ):
+        message: discord.Message
+        try:
+            if not message_id == 0:
+                channel = ctx.guild.get_channel(
+                    channel_id if not isinstance(channel_id, discord.TextChannel) else channel_id.id
+                )
+                if not channel:
+                    print("Couldn't find the channel")
+                    await ctx.message.add_reaction(self.config["emotes"]["no"])
+                    return
+                message = await channel.fetch_message(message_id)
+            else:
+                message = await ctx.channel.fetch_message(channel_id)
+        except discord.NotFound:
+            print("Not found")
+            await ctx.message.add_reaction(self.config["emotes"]["no"])
+
+        if not ctx.author.id == self.config["owner_id"]:
+            if message.author.id == self.config["owner_id"]:
+                return
+
+        has_content = False
+
+        message_attr = {
+            "allowed_mentions": discord.AllowedMentions(
+                everyone=False,
+                users=True,
+                roles=False,
+                replied_user=True
+            )
+        }
+
+        if ctx.message.reference:
+            message_attr["reference"] = ctx.message.reference
+
+        if message.embeds:
+            message_attr["embeds"] = message.embeds
+
+        if message.content:
+            has_content = True
+            message_attr['content'] = f'"{message.content}"\n\\- {message.author.name} probably'
+
+        if message.attachments:
+            files = [await attachment.to_file() for attachment in message.attachments]
+            message_attr["files"] = files
+
+        await ctx.send(**message_attr)
+        if not has_content:
+            await ctx.send(f'\\- {message.author.name} probably')
 
     @commands.command()
     async def card(self, ctx: commands.Context):
