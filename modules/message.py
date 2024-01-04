@@ -10,6 +10,8 @@ class MessageModule:
         self.config = get_config()
 
     async def init_gif(self):
+        if isinstance(self.event.channel, discord.DMChannel):
+            return
         regex = (
             fr'(?:view\/)?({re.escape("trollszn123-ronaldo-gif-18268194")}'
             fr'|{re.escape("boOys" + ".gif")})'

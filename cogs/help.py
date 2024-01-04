@@ -15,14 +15,14 @@ bottom_info = ''
 class Help(commands.Cog):
     """ Help commands """
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command(name='help',
                       description='Help command',
                       aliases=['info', 'commands'],
                       case_insensitive=True)
-    async def help_command(self, ctx, *commands: str):
+    async def help_command(self, ctx: commands.Context, *commands: str):
         """ Shows this message """
         bot = ctx.bot
         embed = discord.Embed(title=bot_title, description=bot_description)
@@ -49,22 +49,26 @@ class Help(commands.Cog):
         def generate_command_list(cog):
             """ Generates the command list with properly spaced help messages """
             # Determine longest word
-            max = 0
+            max_length = 0
             for command in bot.get_cog(cog).get_commands():
                 if not command.hidden:
-                    if len(f'{command}') > max:
-                        max = len(f'{command}')
+                    if len(f'{command}') > max_length:
+                        max_length = len(f'{command}')
+
             # Build list
             temp = ""
-            for command in bot.get_cog(cog).get_commands():
+            for command in bot.get_cog(cog).walk_commands():
                 if command.hidden:
                     temp += ''
                 elif command.help is None:
-                    temp += f'{command}, '
+                    if command.parent:
+                        temp += f'{command.name}, '
+                    else:
+                        temp += f'{command}, '
                 else:
                     temp += f'`{command}`'
-                    for i in range(0, max - len(f'{command}') + 1):
-                        temp += '   '
+                    for i in range(0, max_length - len(f'{command}') + 1):
+                        temp += '   '
                     temp += f'{command.help}\n'
             return temp
 

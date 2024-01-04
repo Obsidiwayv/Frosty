@@ -1,15 +1,20 @@
+import random
+
 from discord.ext import commands
-from memelib.api import DankMemeClient
-from os import getcwd
+# from memelib.api import DankMemeClient
+from redditmemeapi import specifysub
 
 import discord
 import pedalboard
 
-memes = DankMemeClient()
+
+# memes = DankMemeClient()
 
 
 async def generate_post_from_reddit(sub: str):
-    danks = await memes.async_meme(subreddit=sub)
+    subreddit = specifysub(sub)
+    danks = random.choice(subreddit)
+    # danks = await memes.async_meme(subreddit=sub)
     embed = discord.Embed(color=0x703BE7)
     embed.description = danks['title']
     embed.set_footer(text=danks['author'])
@@ -32,6 +37,10 @@ class Fun(commands.Cog):
     @commands.command()
     async def furry(self, ctx: commands.Context):
         await ctx.send(embed=await generate_post_from_reddit("furry_irl"))
+
+    @commands.command()
+    async def gulag(self, ctx: commands.Context):
+        await ctx.send("ВЫ СЛОМАЛИ МАТЬ РОССИИ СЛАВНЫЕ ПРАВИЛА")
 
 
 async def setup(bot: commands.Bot):

@@ -9,10 +9,26 @@ import assets.images as assets
 from utils import get_config
 
 
+def sanitize_content(content):
+    # Remove mentions from the content
+    content = discord.utils.escape_mentions(content)
+    return content
+
+
 class Core(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.config = get_config()
+        self.sniped_messages = {}
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        self.sniped_messages[message.channel.id] = (
+            message.content,
+            message.author,
+            message.created_at,
+            message.attachments
+        )
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
@@ -48,62 +64,103 @@ class Core(commands.Cog):
         print(available)
         await ctx.send(content=f"```bots available emojis```\n{available}")
 
-    @commands.command(aliases=["q"])
+    @staticmethod
+    async def snipe_message(ctx, message_info):
+        message_content, message_author, message_time, attachments = message_info
+        msg_attr = {}
+
+        if len(attachments):
+            msg_attr["files"] = [await attachment.to_file() for attachment in attachments]
+
+        msg_attr["content"] = f"{sanitize_content(message_content)}\n\n{message_author}"
+        await ctx.send(**msg_attr)
+        return
+
+    @commands.command(aliases=["q", "s", "sq", "snipe"])
     async def quote(
             self,
             ctx: commands.Context,
-            channel_id: int | discord.TextChannel,
+            channel: typing.Optional[discord.TextChannel] = None,
             message_id: typing.Optional[int] = 0
     ):
-        message: discord.Message
-        try:
-            if not message_id == 0:
-                channel = ctx.guild.get_channel(
-                    channel_id if not isinstance(channel_id, discord.TextChannel) else channel_id.id
-                )
-                if not channel:
-                    print("Couldn't find the channel")
-                    await ctx.message.add_reaction(self.config["emotes"]["no"])
-                    return
+        channel = channel or ctx.channel
+        channel_id = channel.id
+
+        if message_id != 0:
+            # Quote the specified message
+            try:
+                if channel:
+                    channel = ctx.guild.get_channel(
+                        channel_id if not isinstance(channel, discord.TextChannel) else channel.id)
+                    if not channel:
+                        print("Couldn't find the channel")
+                        await ctx.message.add_reaction(self.config["emotes"]["no"])
+                        return
+                else:
+                    channel = ctx.channel
+
                 message = await channel.fetch_message(message_id)
-            else:
-                message = await ctx.channel.fetch_message(channel_id)
-        except discord.NotFound:
-            print("Not found")
-            await ctx.message.add_reaction(self.config["emotes"]["no"])
+            except discord.NotFound:
+                print("Not found")
+                await ctx.message.add_reaction(self.config["emotes"]["no"])
 
-        if not ctx.author.id == self.config["owner_id"]:
-            if message.author.id == self.config["owner_id"]:
+            if not ctx.author.id == self.config["owner_id"]:
+                if message.author.id == self.config["owner_id"]:
+                    return
+
+            has_content = False
+
+            message_attr = {
+                "allowed_mentions": discord.AllowedMentions(
+                    everyone=False,
+                    users=True,
+                    roles=False,
+                    replied_user=True
+                )
+            }
+
+            if ctx.message.reference:
+                message_attr["reference"] = ctx.message.reference
+
+            if message.content:
+                has_content = True
+                message_attr['content'] = f'"{message.content}"\n\\- {message.author.name} probably'
+
+            if message.attachments:
+                files = [await attachment.to_file() for attachment in message.attachments]
+                message_attr["files"] = files
+
+            await ctx.send(**message_attr)
+            if not has_content:
+                await ctx.send(f'\\- {message.author.name} probably')
+        else:
+            message_info = self.sniped_messages.get(channel_id)
+            if message_info:
+                message_content, message_author, message_time, attachments = message_info
+                if not ctx.author.id == self.config["owner_id"]:
+                    if message_author.id == self.config["owner_id"]:
+                        return
+                await self.snipe_message(ctx, message_info)
                 return
+            else:
+                await ctx.send("No recently deleted messages found in the specified channel.")
 
-        has_content = False
+            # Check for mentions and snipe the most recent message from the mentioned channel
+            if ctx.message.channel_mentions:
+                mentioned_channel = ctx.message.channel_mentions[0]
+                mentioned_channel_id = mentioned_channel.id
 
-        message_attr = {
-            "allowed_mentions": discord.AllowedMentions(
-                everyone=False,
-                users=True,
-                roles=False,
-                replied_user=True
-            )
-        }
-
-        if ctx.message.reference:
-            message_attr["reference"] = ctx.message.reference
-
-        if message.embeds:
-            message_attr["embeds"] = message.embeds
-
-        if message.content:
-            has_content = True
-            message_attr['content'] = f'"{message.content}"\n\\- {message.author.name} probably'
-
-        if message.attachments:
-            files = [await attachment.to_file() for attachment in message.attachments]
-            message_attr["files"] = files
-
-        await ctx.send(**message_attr)
-        if not has_content:
-            await ctx.send(f'\\- {message.author.name} probably')
+                # Fetch the most recent deleted message from the mentioned channel
+                message_info = self.sniped_messages.get(mentioned_channel_id)
+                if message_info:
+                    message_content, message_author, message_time, attachments = message_info
+                    if not ctx.author.id == self.config["owner_id"]:
+                        if message_author.id == self.config["owner_id"]:
+                            return
+                    await self.snipe_message(ctx, message_info)
+                    return
+                else:
+                    await ctx.send(f"No recently deleted messages found in {mentioned_channel.mention}.")
 
     @commands.command()
     async def card(self, ctx: commands.Context):

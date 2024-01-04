@@ -3,7 +3,7 @@ from pydactyl import PterodactylClient
 
 import discord
 
-py = PterodactylClient("https://proxied.host/", "ptlc_cSGpz27CvZpeWLIIiJdnQLwiwIyvjbPXVcrYQABGyBi")
+py = PterodactylClient("https://manage.proxied.host/", "ptlc_cSGpz27CvZpeWLIIiJdnQLwiwIyvjbPXVcrYQABGyBi")
 
 
 class Server(commands.Cog):
