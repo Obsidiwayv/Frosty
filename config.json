@@ -13,5 +13,13 @@
     749619347751829534
   ],
   "owner_id": 609899399358971924,
-  "prefix": "~"
+  "prefix": "~",
+  "firefox": {
+    "windows": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+    "linux": "firefox\\browser\\firefox"
+  },
+  "gecko": {
+    "windows": "firefox\\gecko\\geckodriver.exe",
+    "linux": "firefox\\gecko\\geckodriver"
+  }
 }

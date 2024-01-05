@@ -1,3 +1,4 @@
+import os
 import typing
 from io import BytesIO
 from time import sleep
@@ -22,12 +23,16 @@ class Core(commands.Cog):
         self.sniped_messages = {}
 
     @commands.Cog.listener()
-    async def on_message_delete(self, message):
+    async def on_message_delete(self, message: discord.Message):
+        # if len(message.attachments):
+        #    first_attachment = message.attachments[0]
+        #    await first_attachment.save(f"cache/{first_attachment.filename}")
+
         self.sniped_messages[message.channel.id] = (
             message.content,
             message.author,
             message.created_at,
-            message.attachments
+            # f"cache/{first_attachment.filename}"
         )
 
     @commands.command()
@@ -66,14 +71,14 @@ class Core(commands.Cog):
 
     @staticmethod
     async def snipe_message(ctx, message_info):
-        message_content, message_author, message_time, attachments = message_info
-        msg_attr = {}
+        message_content, message_author, message_time = message_info
+        # msg_attr = {}
 
-        if len(attachments):
-            msg_attr["files"] = [await attachment.to_file() for attachment in attachments]
+        # if len(attachments):
+        #    with open(attachments, "rb") as file:
+        #        msg_attr["files"] = [discord.File(file)]
 
-        msg_attr["content"] = f"{sanitize_content(message_content)}\n\n{message_author}"
-        await ctx.send(**msg_attr)
+        await ctx.send(f"{sanitize_content(message_content)}\n\n{message_author}")
         return
 
     @commands.command(aliases=["q", "s", "sq", "snipe"])

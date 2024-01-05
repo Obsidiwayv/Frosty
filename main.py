@@ -1,3 +1,4 @@
+import os
 import re
 
 from discord.ext import commands
@@ -42,6 +43,13 @@ def main():
 
     @client.event
     async def on_ready():
+        # print("Clearing image cache...")
+        # cache_directory = "cache"
+        # for filename in os.listdir(cache_directory):
+        #    file_path = os.path.join(cache_directory, filename)
+        #    if os.path.isfile(file_path) and filename.lower().endswith(
+        #            ('.png', '.jpg', '.jpeg', '.gif', '.mp4', 'mp3')):
+        #        os.remove(file_path)
         print("ready to serve!")
         await init_lavalink()
         await load()
