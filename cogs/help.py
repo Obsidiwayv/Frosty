@@ -72,14 +72,25 @@ class Help(commands.Cog):
                     temp += f'{command.help}\n'
             return temp
 
+        # Helper function to add fields to the embed
+        async def add_field_to_embed(name, value, inline=True):
+            field_count: int = 0
+            embed.add_field(name=name, value=value, inline=inline)
+            field_count += 1
+            if field_count == 25:
+                # If 25 fields reached, send the current embed and reset counters
+                await ctx.send(embed=embed)
+                embed.clear_fields()
+                field_count = 0
+
         # Help by itself just lists our own commands.
         if len(commands) == 0:
             for cog in bot.cogs:
                 temp = generate_command_list(cog)
                 if temp != "":
-                    embed.add_field(name=f'**{cog}**', value=temp, inline=True)
+                    await add_field_to_embed(name=f'**{cog}**', value=temp, inline=True)
             if bottom_info != "":
-                embed.add_field(name="Info", value=bottom_info, inline=True)
+                await add_field_to_embed(name="Info", value=bottom_info, inline=True)
         elif len(commands) == 1:
             # Try to see if it is a cog name
             name = commands[0].capitalize()

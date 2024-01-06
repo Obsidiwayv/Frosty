@@ -88,7 +88,7 @@ class Music(commands.Cog):
                     return m.author == ctx.author
 
                 try:
-                    waited = await self.bot.wait_for("message", timeout=10, check=check)
+                    waited = await self.bot.wait_for("message", timeout=25, check=check)
                     if not re.match(r'^\d+$', waited.content):
                         await ctx.send("The string you provided isn't a number!")
                         return
@@ -152,6 +152,50 @@ class Music(commands.Cog):
         player.queue.clear()
         await player.disconnect()
         await ctx.message.add_reaction(self.config["emotes"]["success"])
+
+    @commands.command(aliases=["loop"])
+    async def repeat(self, ctx: commands.Context):
+        player = await check_and_send(ctx, default_response)
+        if not player:
+            return
+
+        async def send_stop_message():
+            player.queue.mode = wavelink.QueueMode.normal
+            await ctx.send("Stopped looping...")
+
+        print(player.queue.mode)
+        if player.queue.mode == wavelink.QueueMode.loop:
+            await send_stop_message()
+            return
+        elif player.queue.mode == wavelink.QueueMode.loop_all:
+            await send_stop_message()
+            return
+        try:
+            def check(m):
+                return m.author == ctx.author
+
+            await ctx.send("Loop the queue or *track*?")
+
+            collector = await self.bot.wait_for("message", check=check, timeout=25)
+
+            if collector.content == "queue":
+                player.queue.mode = wavelink.QueueMode.loop_all
+                await ctx.send("Looping the queue.")
+            elif collector.content == "track":
+                player.queue.mode = wavelink.QueueMode.loop
+                await ctx.send("Looping the track.")
+            else:
+                await ctx.send("Invalid option.")
+        except asyncio.TimeoutError:
+            await ctx.send("You didn't pick a option in time!")
+
+    @commands.command(aliases=["mix"])
+    async def shuffle(self, ctx: commands.Context):
+        player = await check_and_send(ctx, default_response)
+        if not player:
+            return
+        player.queue.shuffle()
+        await ctx.send("Mixed up the queue...")
 
     @commands.command()
     async def pause(self, ctx: commands.Context):

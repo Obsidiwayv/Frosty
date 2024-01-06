@@ -1,5 +1,6 @@
 import os
 import typing
+from datetime import date
 from io import BytesIO
 from time import sleep
 from discord.ext import commands
@@ -24,15 +25,18 @@ class Core(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
-        # if len(message.attachments):
-        #    first_attachment = message.attachments[0]
-        #    await first_attachment.save(f"cache/{first_attachment.filename}")
+        files = False
+        if len(message.attachments) > 0:
+            # There are attachments in the message
+            attachments = [await attachment.to_file() for attachment in message.attachments]
+            files = await (self.bot.get_channel(self.config["channels"]["attachments"])
+                           .send(content=f"{message.author.id} - {date.today()}", files=attachments))
 
         self.sniped_messages[message.channel.id] = (
             message.content,
             message.author,
             message.created_at,
-            # f"cache/{first_attachment.filename}"
+            files
         )
 
     @commands.command()
@@ -71,14 +75,15 @@ class Core(commands.Cog):
 
     @staticmethod
     async def snipe_message(ctx, message_info):
-        message_content, message_author, message_time = message_info
-        # msg_attr = {}
+        message_content, message_author, message_time, bot_message = message_info
+        msg_attr = {
+            "content": f"{sanitize_content(message_content)}\n\n{message_author}"
+        }
 
-        # if len(attachments):
-        #    with open(attachments, "rb") as file:
-        #        msg_attr["files"] = [discord.File(file)]
+        if bot_message:
+            msg_attr["files"] = [await attachment.to_file() for attachment in bot_message.attachments]
 
-        await ctx.send(f"{sanitize_content(message_content)}\n\n{message_author}")
+        await ctx.send(**msg_attr)
         return
 
     @commands.command(aliases=["q", "s", "sq", "snipe"])
