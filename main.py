@@ -1,4 +1,3 @@
-import os
 import re
 
 from discord.ext import commands
@@ -8,7 +7,9 @@ import discord
 import json
 import wavelink
 
-import utils
+import dragon.gd.request_client
+import dragon.gd.gd_decode
+from dragon import logger
 import helpers.mysql
 from modules.message import MessageModule
 
@@ -50,7 +51,7 @@ def main():
         #    if os.path.isfile(file_path) and filename.lower().endswith(
         #            ('.png', '.jpg', '.jpeg', '.gif', '.mp4', 'mp3')):
         #        os.remove(file_path)
-        print("ready to serve!")
+        logger.log_info("Online!")
         await init_lavalink()
         await load()
 

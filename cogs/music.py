@@ -30,6 +30,23 @@ class Music(commands.Cog):
         self.config = get_config()
 
     @commands.Cog.listener()
+    async def on_voice_state_update(self,
+                                    member: discord.Member,
+                                    before: discord.VoiceState,
+                                    after: discord.VoiceState):
+        if after.channel:
+            return
+        player: wavelink.Player
+        player = cast(wavelink.Player, before.channel.guild.voice_client)
+
+        if not player:
+            return
+
+        if len(before.channel.members) == 1:
+            player.queue.clear()
+            await player.disconnect()
+
+    @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload: wavelink.TrackStartEventPayload):
         ts = 180
         image_path = await assets.draw_song_interface(

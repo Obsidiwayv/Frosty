@@ -82,6 +82,32 @@ class Tag(commands.Cog):
             )
             cursor.close()
 
+    @tag.command()
+    async def edit(self, ctx: commands.Context, name: str, *, txt: str):
+        if len(txt) > 2000:
+            await ctx.send("Tag text cannot exceed 2000 characters.")
+            return
+        with self.db.database_octane.cursor() as cursor:
+            try:
+                old_data = self.get_tag_from_db(cursor, name, ctx.guild.id)
+                if not old_data:
+                    await ctx.send("A tag by that name does not exist.")
+                    return
+                if not old_data["user"] == ctx.author.id:
+                    await ctx.send("That tag isn't yours.")
+                    return
+
+                sql = "UPDATE `TAGS` SET `text`=%s WHERE `name`=%s AND `guild`=%s"
+
+                cursor.execute(sql, (txt, name, ctx.guild.id))
+                self.db.database_octane.commit()
+                await ctx.send(f"Edited `{name}`")
+            except Exception as e:
+                await ctx.send(f"I could not edit your tag.\n```\n{e}\n```")
+                return
+            finally:
+                cursor.close()
+
     @tag.command(aliases=["add"])
     async def create(self, ctx: commands.Context, name: str, *, txt: str):
         if len(name) > 15:

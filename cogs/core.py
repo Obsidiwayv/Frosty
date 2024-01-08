@@ -8,6 +8,7 @@ from discord.ext import commands
 import discord
 
 import assets.images as assets
+import dragon.logger
 from utils import get_config
 
 
@@ -25,6 +26,7 @@ class Core(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
+        dragon.logger.log_user(message)
         files = False
         if len(message.attachments) > 0:
             # There are attachments in the message
@@ -49,7 +51,7 @@ class Core(commands.Cog):
         embed.description = "A fluffy protogen to serve!"
         embed.set_image(url="https://wayvlyte.space/octane_banner.png")
         embed.add_field(name="developer", value="obsidiwayv/obsidiwayv#3420", inline=True)
-        embed.add_field(name="Protogen software version", value="1.2.0-Titanium", inline=True)
+        embed.add_field(name="Protogen software version", value="1.4.0-Thorium", inline=True)
         await ctx.send(embed=embed)
 
     @commands.command()
