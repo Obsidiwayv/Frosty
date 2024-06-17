@@ -1,7 +1,7 @@
 discord~=2.3.2
 pedalboard~=0.8.6
 MemeLib~=0.1.5
-wavelink~=3.0.0
+wavelink~=3.3.0
 PyMySQL~=1.1.0
 ossapi~=3.4.2
 requests~=2.31.0
@@ -10,5 +10,4 @@ beautifulsoup4~=4.12.2
 bs4~=0.0.1
 redditmemeapi~=0.0.3
 colour~=0.1.5
-selenium~=4.16.0
 colormath~=3.0.0

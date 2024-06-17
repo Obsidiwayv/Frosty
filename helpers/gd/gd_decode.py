@@ -1,12 +1,11 @@
 import base64
 import json
-from io import BytesIO
 
-import dragon.gd.gd_constants
-import dragon.gd.official_songs
-import dragon.gd.colours
+import helpers.gd.gd_constants
+import helpers.gd.official_songs
+import helpers.gd.colours
 
-with open("./dragon/gd/json/colors.json") as colour_json:
+with open("./helpers/gd/json/colors.json") as colour_json:
     colors = json.load(colour_json)
 
 
@@ -24,9 +23,9 @@ def user_scores(user: str):
         "demons": int(s[31]),
         "moons": int(s[25]),
         "creatorPoints": int(s[27]),
-        "c1": dragon.gd.colours.rgb_to_hex(colors[s[13]]),
-        "c2": dragon.gd.colours.rgb_to_hex(colors[s[15]]),
-        "iconType": dragon.gd.gd_constants.Icon.objects[s[17]]
+        "c1": helpers.gd.colours.rgb_to_hex(colors[s[13]]),
+        "c2": helpers.gd.colours.rgb_to_hex(colors[s[15]]),
+        "iconType": helpers.gd.gd_constants.Icon.objects[s[17]]
     }
 
 
@@ -66,11 +65,11 @@ def level_data(res: str):
     for lvl in levels:
         level_object = lvl.split(":")
 
-        difficulties = dragon.gd.gd_constants.Difficulty.basic
+        difficulties = helpers.gd.gd_constants.Difficulty.basic
 
         if level_object[21] != '':
             if bool(int(level_object[21])):
-                difficulties = dragon.gd.gd_constants.Difficulty.demons
+                difficulties = helpers.gd.gd_constants.Difficulty.demons
 
         output = {
             "id": int(level_object[1]),
@@ -84,14 +83,14 @@ def level_data(res: str):
             "downloads": int(level_object[13]),
             "likes": int(level_object[19]),
             "disliked": True if int(level_object[19]) < 0 else False,
-            "length": dragon.gd.gd_constants.Length.objects[int(level_object[37])],
+            "length": helpers.gd.gd_constants.Length.objects[int(level_object[37])],
             "demon": is_demon(level_object[21]),
             "featured": bool(int(level_object[29])),
             "epic": bool(int(level_object[31])),
             "objects": int(level_object[33]),
             "stars_requested": int(level_object[47]),
-            "game_version": dragon.gd.gd_constants.Version.lists[int(level_object[17])] if
-            dragon.gd.gd_constants.Version.lists[int(level_object[17])] else "Pre-1.7",
+            "game_version": helpers.gd.gd_constants.Version.lists[int(level_object[17])] if
+            helpers.gd.gd_constants.Version.lists[int(level_object[17])] else "Pre-1.7",
             "copied_from": int(level_object[39]),
             "large": True if int(level_object[33]) > 4e4 else False,
             "two_player": bool(int(level_object[41])),
@@ -107,9 +106,9 @@ def level_data(res: str):
         if official_song_id == 0 and song_id != 0 or official_song_id != 0 and song_id != 0:
             song = enc_songs[str(song_id)]
         if official_song_id != 0 and song_id == 0:
-            song = dragon.gd.official_songs.get_song(official_song_id + 1)
+            song = helpers.gd.official_songs.get_song(official_song_id + 1)
         if official_song_id == 0 and song_id == 0:
-            song = dragon.gd.official_songs.get_song(1)
+            song = helpers.gd.official_songs.get_song(1)
 
         output["creator"] = enc_creators[player_id] if enc_creators.get(player_id) else "-"
         output["song"] = song

@@ -1,14 +1,13 @@
 import os
 import urllib.parse
-from io import BytesIO
 
 from PIL import Image
 from discord.ext import commands
 
 import discord
 
-import dragon.gd.request_client
-import dragon.gd.gd_decode
+import helpers.gd.request_client
+import helpers.gd.gd_decode
 # import gd
 
 import utils
@@ -63,12 +62,12 @@ class GD(commands.Cog):
     async def search(self, ctx: commands.Context, level_name: str):
         try:
             fields = ""
-            result = dragon.gd.request_client.make("getGJLevels21", {
+            result = helpers.gd.request_client.make("getGJLevels21", {
                 "str": level_name,
                 "total": 10,
                 "type": 0
             })
-            levels = dragon.gd.gd_decode.level_data(result.text)
+            levels = helpers.gd.gd_decode.level_data(result.text)
             fields += f"## Search: `{level_name}`\n"
             fields += "```\n"
 
@@ -77,7 +76,7 @@ class GD(commands.Cog):
                 return
 
             for level in levels:
-                fields += f"{level["id"]} - {level["name"]} by {level["creator"]} ({level["difficulty"]})\n\n"
+                fields += f"{level['id']} - {level['name']} by {level['creator']} ({level['difficulty']})\n\n"
 
             fields += "```"
             fields += f"{len(levels)} out of 10 results"
@@ -89,11 +88,11 @@ class GD(commands.Cog):
     @commands.command()
     async def level(self, ctx: commands.Context, level_id: int):
         try:
-            request = dragon.gd.request_client.make("getGJLevels21", {
+            request = helpers.gd.request_client.make("getGJLevels21", {
                 "str": str(level_id),
                 "type": 0
             })
-            levels = dragon.gd.gd_decode.level_data(request.text)
+            levels = helpers.gd.gd_decode.level_data(request.text)
             if len(levels) == 0:
                 await ctx.send("That level doesn't appear to exist...")
                 return
@@ -101,7 +100,7 @@ class GD(commands.Cog):
             embed = discord.Embed()
 
             embed.title = str(level["id"])
-            embed.description = f"{level["name"]} by {level["creator"]}\n```{level["description"]}```"
+            embed.description = f"{level['name']} by {level['creator']}\n```{level['description']}```"
 
             image_path = self.render_difficulty_face(
                 level["difficulty"],
@@ -122,7 +121,7 @@ class GD(commands.Cog):
 
             embed.add_field(
                 name="Song",
-                value=f"({level['song']['file_size'] if level['song'].get("file_size") else "Official Song"})  "
+                value=f"({level['song']['file_size'] if level['song'].get('file_size') else 'Official Song'})  "
                       f"{level['song']['artist']} - "
                       f"{level['song']['name']}"
             )
@@ -134,7 +133,8 @@ class GD(commands.Cog):
             )
 
             with open(image_path, 'rb') as file:
-                embed.set_thumbnail(url=f"attachment://{image_path.split("\\")[2]}")
+                file_path = image_path.split('\\')[2]
+                embed.set_thumbnail(url=f"attachment://{file_path}")
                 await ctx.send(
                     content=f"Creator - {level['creator']}",
                     embed=embed,
@@ -142,10 +142,6 @@ class GD(commands.Cog):
                 )
         except Exception as e:
             await ctx.send(f"ERROR\n```\n{e}\n```")
-
-    @commands.command()
-    async def more(self, ctx: commands.Context):
-        await ctx.send("Want more geometry dash content? invite robtop 2! coming soon:tm:")
 
 
 async def setup(bot: commands.Bot):

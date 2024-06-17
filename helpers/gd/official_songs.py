@@ -1,6 +1,6 @@
 import json
 
-with open("./dragon/gd/json/officialsongs.json") as official:
+with open("./helpers/gd/json/officialsongs.json") as official:
     song_json = json.load(official)
 
 song_object = {

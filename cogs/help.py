@@ -7,7 +7,7 @@ import utils
 
 config = utils.get_config()
 prefix = config['prefix']
-bot_title = 'Frosty help command'
+bot_title = 'Octane help command'
 bot_description = ''
 bottom_info = ''
 

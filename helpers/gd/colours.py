@@ -13,7 +13,7 @@ def rgb_to_hex(col: str):
     g_hex = format(int(g), '02x')
     b_hex = format(int(b), '02x')
 
-    return (f"{"0" + r_hex if len(r_hex) == 1 else r_hex}"
-            f"{"0" + g_hex if len(g_hex) == 1 else g_hex}"
-            f"{"0" + b_hex if len(b_hex) == 1 else b_hex}")
+    return ("0" + r_hex if len(r_hex) == 1 else r_hex,
+            "0" + g_hex if len(g_hex) == 1 else g_hex,
+            "0" + b_hex if len(b_hex) == 1 else b_hex)
 

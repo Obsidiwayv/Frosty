@@ -22,12 +22,6 @@ class MySQLHelper:
             cursorclass=pymysql.cursors.DictCursor
         )
 
-    def ping_db(self):
-        return self.database.ping()
-
-    def ping_octane_db(self):
-        return self.database_octane.ping()
-
     def kermit(self):
         self.database.close()
         self.database_octane.close()
