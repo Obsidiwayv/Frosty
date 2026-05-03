@@ -50,7 +50,7 @@ def main():
         await load()
 
     async def init_lavalink():
-        node1 = wavelink.Node(uri='http://n1.proxied.host:25589', password='wayvlink')
+        node1 = wavelink.Node(uri='', password='wayvlink')
         await wavelink.Pool.connect(client=client, nodes=[node1])
 
     async def load():
